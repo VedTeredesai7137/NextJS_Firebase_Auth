@@ -136,8 +136,8 @@ export default function LoginPage() {
                   transition: 'border-color 0.2s',
                   boxSizing: 'border-box'
                 }}
-                onFocus={(e) => e.target.style.borderColor = '#10b981'}
-                onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+                onFocus={(e) => (e.target as HTMLInputElement).style.borderColor = '#10b981'}
+                onBlur={(e) => (e.target as HTMLInputElement).style.borderColor = '#d1d5db'}
               />
             </div>
 
@@ -170,8 +170,8 @@ export default function LoginPage() {
                   transition: 'border-color 0.2s',
                   boxSizing: 'border-box'
                 }}
-                onFocus={(e) => e.target.style.borderColor = '#10b981'}
-                onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+                onFocus={(e) => (e.target as HTMLInputElement).style.borderColor = '#10b981'}
+                onBlur={(e) => (e.target as HTMLInputElement).style.borderColor = '#d1d5db'}
               />
             </div>
 

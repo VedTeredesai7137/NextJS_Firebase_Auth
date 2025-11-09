@@ -3,7 +3,10 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { loginUser, validateEmail, validatePassword, onAuthStateChanged, auth } from '@/lib/firebase';
+import { loginUser, validateEmail, validatePassword, onAuthStateChanged, getAuth } from '@/lib/firebase';
+
+// Prevent static generation - this page requires client-side Firebase
+export const dynamic = 'force-dynamic';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -13,7 +16,10 @@ export default function LoginPage() {
   const router = useRouter();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    // Only run on client side
+    if (typeof window === "undefined") return;
+    
+    const unsubscribe = onAuthStateChanged(getAuth(), (user) => {
       if (user) {
         router.push('/home');
       }

@@ -3,14 +3,23 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { onAuthStateChanged, auth, User } from '@/lib/firebase';
+import { onAuthStateChanged, getAuth, User } from '@/lib/firebase';
+
+// Prevent static generation - this page uses client-side Firebase
+export const dynamic = 'force-dynamic';
 
 export default function LandingPage() {
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user: User | null) => {
+    // Only run on client side
+    if (typeof window === "undefined") {
+      setIsLoading(false);
+      return;
+    }
+    
+    const unsubscribe = onAuthStateChanged(getAuth(), (user: User | null) => {
       if (user) {
         router.push('/home');
       }

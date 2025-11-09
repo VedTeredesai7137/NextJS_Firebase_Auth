@@ -2,7 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { logoutUser, onAuthStateChanged, auth, User } from '@/lib/firebase';
+import { logoutUser, onAuthStateChanged, getAuth, User } from '@/lib/firebase';
+
+// Prevent static generation - this page requires client-side Firebase
+export const dynamic = 'force-dynamic';
 
 export default function HomePage() {
   const [user, setUser] = useState<User | null>(null);
@@ -11,7 +14,10 @@ export default function HomePage() {
   const router = useRouter();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    // Only run on client side
+    if (typeof window === "undefined") return;
+    
+    const unsubscribe = onAuthStateChanged(getAuth(), (user) => {
       if (user) {
         setUser(user);
       } else {

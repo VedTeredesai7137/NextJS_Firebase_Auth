@@ -1,29 +1,116 @@
-import { initializeApp, getApps, getApp, FirebaseError } from "firebase/app";
+import { initializeApp, getApps, getApp as getFirebaseApp, FirebaseError } from "firebase/app";
 import { 
-  getAuth, 
+  getAuth as getFirebaseAuth, 
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword, 
   signOut, 
   updateProfile,
   User,
-  onAuthStateChanged
+  onAuthStateChanged,
+  Auth
 } from "firebase/auth";
-import { getAnalytics } from "firebase/analytics";
+import { getAnalytics as getFirebaseAnalytics, Analytics } from "firebase/analytics";
+import { FirebaseApp } from "firebase/app";
 
-const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY!,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN!,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID!,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET!,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID!,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID!,
-  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID!,
+// Lazy initialization variables
+let app: FirebaseApp | null = null;
+let auth: Auth | null = null;
+let analytics: Analytics | null = null;
+
+// Get Firebase config - only use in browser
+const getFirebaseConfig = () => {
+  // During build time, return a dummy config to prevent errors
+  if (typeof window === "undefined") {
+    return {
+      apiKey: "dummy-key",
+      authDomain: "dummy.firebaseapp.com",
+      projectId: "dummy-project",
+      storageBucket: "dummy.appspot.com",
+      messagingSenderId: "123456789",
+      appId: "1:123456789:web:dummy",
+      measurementId: "G-DUMMY"
+    };
+  }
+
+  const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
+  const authDomain = process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN;
+  const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
+  const storageBucket = process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET;
+  const messagingSenderId = process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID;
+  const appId = process.env.NEXT_PUBLIC_FIREBASE_APP_ID;
+  const measurementId = process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID;
+
+  if (!apiKey || !authDomain || !projectId || !storageBucket || !messagingSenderId || !appId) {
+    throw new Error("Missing Firebase configuration. Please check your environment variables.");
+  }
+
+  return {
+    apiKey,
+    authDomain,
+    projectId,
+    storageBucket,
+    messagingSenderId,
+    appId,
+    measurementId,
+  };
 };
 
-// Initialize Firebase only once
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-const auth = getAuth(app);
-const analytics = typeof window !== "undefined" ? getAnalytics(app) : null;
+// Initialize Firebase lazily - only on client side
+const initializeFirebase = (): { app: FirebaseApp; auth: Auth; analytics: Analytics | null } => {
+  // Only initialize in browser
+  if (typeof window === "undefined") {
+    throw new Error("Firebase can only be initialized on the client side.");
+  }
+
+  // Return existing instances if already initialized
+  if (app && auth) {
+    return { app, auth, analytics };
+  }
+
+  const firebaseConfig = getFirebaseConfig();
+  
+  // Check if we're using dummy config (build time)
+  if (firebaseConfig.apiKey === "dummy-key") {
+    throw new Error("Firebase is not available during build time. This should only be called on the client.");
+  }
+
+  // Initialize Firebase only once
+  app = !getApps().length ? initializeApp(firebaseConfig) : getFirebaseApp();
+  auth = getFirebaseAuth(app);
+  analytics = typeof window !== "undefined" ? getFirebaseAnalytics(app) : null;
+
+  return { app, auth, analytics };
+};
+
+// Get app instance (lazy initialization)
+const getAppInstance = (): FirebaseApp => {
+  if (!app) {
+    const instance = initializeFirebase();
+    app = instance.app;
+  }
+  return app;
+};
+
+// Get auth instance (lazy initialization)
+const getAuthInstance = (): Auth => {
+  if (!auth) {
+    const instance = initializeFirebase();
+    auth = instance.auth;
+  }
+  return auth;
+};
+
+// Get analytics instance (lazy initialization)
+const getAnalyticsInstance = (): Analytics | null => {
+  if (typeof window === "undefined") {
+    return null;
+  }
+  if (!analytics) {
+    const instance = initializeFirebase();
+    analytics = instance.analytics;
+  }
+  return analytics;
+};
 
 // Error handling
 export interface AuthError {
@@ -98,7 +185,8 @@ export const validateName = (name: string): string | null => {
 // Auth functions
 export const registerUser = async (email: string, password: string, name: string) => {
   try {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const authInstance = getAuthInstance();
+    const userCredential = await createUserWithEmailAndPassword(authInstance, email, password);
     await updateProfile(userCredential.user, { displayName: name });
     return userCredential.user;
   } catch (error) {
@@ -108,7 +196,8 @@ export const registerUser = async (email: string, password: string, name: string
 
 export const loginUser = async (email: string, password: string) => {
   try {
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const authInstance = getAuthInstance();
+    const userCredential = await signInWithEmailAndPassword(authInstance, email, password);
     return userCredential.user;
   } catch (error) {
     throw handleAuthError(error);
@@ -117,10 +206,72 @@ export const loginUser = async (email: string, password: string) => {
 
 export const logoutUser = async () => {
   try {
-    await signOut(auth);
+    const authInstance = getAuthInstance();
+    await signOut(authInstance);
   } catch (error) {
     throw handleAuthError(error);
   }
 };
 
-export { app, auth, analytics, onAuthStateChanged, type User };
+// Export getters that use lazy initialization
+export const getApp = () => getAppInstance();
+export const getAuth = () => getAuthInstance();
+export const getAnalytics = () => getAnalyticsInstance();
+
+// Export auth as a Proxy that lazily initializes Firebase
+// This ensures Firebase is only initialized when actually used (client-side)
+export const auth = new Proxy({} as Auth, {
+  get(target, prop) {
+    // During build/SSR, return a no-op function or undefined for methods
+    if (typeof window === "undefined") {
+      // Return a no-op function for methods to prevent errors during build
+      if (typeof prop === "string" && prop !== "then" && prop !== "toJSON") {
+        return () => {};
+      }
+      return undefined;
+    }
+    try {
+      const authInstance = getAuthInstance();
+      const value = authInstance[prop as keyof Auth];
+      // If it's a function, bind it to the auth instance
+      if (typeof value === "function") {
+        return value.bind(authInstance);
+      }
+      return value;
+    } catch (error) {
+      // If initialization fails, return undefined or a no-op
+      console.error("Firebase auth initialization error:", error);
+      return undefined;
+    }
+  }
+});
+
+// Export app as a Proxy that lazily initializes Firebase
+export const app = new Proxy({} as FirebaseApp, {
+  get(target, prop) {
+    // During build/SSR, return undefined or no-op
+    if (typeof window === "undefined") {
+      if (typeof prop === "string" && prop !== "then" && prop !== "toJSON") {
+        return () => {};
+      }
+      return undefined;
+    }
+    try {
+      const appInstance = getAppInstance();
+      const value = appInstance[prop as keyof FirebaseApp];
+      if (typeof value === "function") {
+        return value.bind(appInstance);
+      }
+      return value;
+    } catch (error) {
+      console.error("Firebase app initialization error:", error);
+      return undefined;
+    }
+  }
+});
+
+// Export analytics (will be null during SSR/build)
+export const analytics = typeof window !== "undefined" ? getAnalyticsInstance() : null;
+
+// Export other Firebase functions
+export { onAuthStateChanged, type User };

@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { logoutUser, onAuthStateChanged, getAuth, User } from '@/lib/firebase';
 
-// Prevent static generation - this page requires client-side Firebase
 export const dynamic = 'force-dynamic';
 
 export default function HomePage() {
@@ -14,7 +13,6 @@ export default function HomePage() {
   const router = useRouter();
 
   useEffect(() => {
-    // Only run on client side
     if (typeof window === "undefined") return;
     
     const unsubscribe = onAuthStateChanged(getAuth(), (user) => {
@@ -42,38 +40,11 @@ export default function HomePage() {
 
   if (isLoading) {
     return (
-      <div style={{
-        minHeight: '100vh',
-        backgroundColor: '#ffffff',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
-      }}>
-        <div style={{ textAlign: 'center' }}>
-          <div style={{
-            width: '32px',
-            height: '32px',
-            border: '3px solid #f3f4f6',
-            borderTop: '3px solid #10b981',
-            borderRadius: '50%',
-            animation: 'spin 1s linear infinite',
-            margin: '0 auto 16px'
-          }}></div>
-          <p style={{
-            color: '#666666',
-            fontSize: '16px',
-            margin: '0'
-          }}>
-            Loading...
-          </p>
+      <div className="min-h-screen bg-white flex items-center justify-center font-sans">
+        <div className="text-center">
+          <div className="w-8 h-8 border-3 border-gray-200 border-t-emerald-500 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600 text-base m-0">Loading...</p>
         </div>
-        <style jsx>{`
-          @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-          }
-        `}</style>
       </div>
     );
   }
@@ -83,60 +54,21 @@ export default function HomePage() {
   }
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      backgroundColor: '#ffffff',
-      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
-    }}>
+    <div className="min-h-screen bg-white font-sans">
       {/* Header */}
-      <div style={{
-        backgroundColor: '#ffffff',
-        borderBottom: '1px solid #e5e5e5',
-        padding: '0 20px'
-      }}>
-        <div style={{
-          maxWidth: '1200px',
-          margin: '0 auto',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          height: '64px'
-        }}>
-          <h1 style={{
-            fontSize: '20px',
-            fontWeight: '600',
-            color: '#000000',
-            margin: '0'
-          }}>
+      <div className="bg-white border-b border-gray-300 px-5">
+        <div className="max-w-6xl mx-auto flex justify-between items-center h-16">
+          <h1 className="text-xl font-semibold text-black m-0">
             Dashboard
           </h1>
           <button
             onClick={handleLogout}
             disabled={isLoggingOut}
-            style={{
-              padding: '8px 16px',
-              backgroundColor: '#ffffff',
-              color: '#dc2626',
-              border: '1px solid #dc2626',
-              borderRadius: '6px',
-              fontSize: '14px',
-              fontWeight: '500',
-              cursor: isLoggingOut ? 'not-allowed' : 'pointer',
-              transition: 'all 0.2s',
-              opacity: isLoggingOut ? 0.6 : 1
-            }}
-            onMouseEnter={(e) => {
-              if (!isLoggingOut) {
-                (e.target as HTMLElement).style.backgroundColor = '#dc2626';
-                (e.target as HTMLElement).style.color = '#ffffff';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (!isLoggingOut) {
-                (e.target as HTMLElement).style.backgroundColor = '#ffffff';
-                (e.target as HTMLElement).style.color = '#dc2626';
-              }
-            }}
+            className={`px-4 py-2 bg-white text-red-600 border border-red-600 rounded text-sm font-medium transition-all ${
+              isLoggingOut 
+                ? 'opacity-60 cursor-not-allowed' 
+                : 'hover:bg-red-600 hover:text-white cursor-pointer'
+            }`}
           >
             {isLoggingOut ? 'Signing out...' : 'Sign Out'}
           </button>
@@ -144,141 +76,44 @@ export default function HomePage() {
       </div>
 
       {/* Main Content */}
-      <div style={{
-        maxWidth: '1200px',
-        margin: '0 auto',
-        padding: '40px 20px'
-      }}>
+      <div className="max-w-6xl mx-auto py-10 px-5">
         {/* Welcome Section */}
-        <div style={{
-          backgroundColor: '#f0fdf4',
-          border: '1px solid #bbf7d0',
-          borderRadius: '12px',
-          padding: '32px',
-          marginBottom: '32px',
-          textAlign: 'center'
-        }}>
-          <h2 style={{
-            fontSize: '28px',
-            fontWeight: '600',
-            color: '#166534',
-            margin: '0 0 8px 0'
-          }}>
+        <div className="bg-green-50 border border-green-200 rounded-xl p-8 mb-8 text-center">
+          <h2 className="text-3xl font-semibold text-green-800 mb-2">
             Welcome back, {user.displayName || 'User'}! 👋
           </h2>
-          <p style={{
-            fontSize: '16px',
-            color: '#15803d',
-            margin: '0'
-          }}>
+          <p className="text-base text-green-700 m-0">
             You have successfully logged in to your account.
           </p>
         </div>
 
         {/* Account Information */}
-        <div style={{
-          backgroundColor: '#ffffff',
-          border: '1px solid #e5e5e5',
-          borderRadius: '12px',
-          padding: '32px',
-          marginBottom: '32px'
-        }}>
-          <h3 style={{
-            fontSize: '20px',
-            fontWeight: '600',
-            color: '#000000',
-            margin: '0 0 24px 0'
-          }}>
+        <div className="bg-white border border-gray-300 rounded-xl p-8 mb-8">
+          <h3 className="text-xl font-semibold text-black mb-6">
             Account Information
           </h3>
           
-          <div style={{
-            display: 'grid',
-            gap: '16px'
-          }}>
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              padding: '12px 0',
-              borderBottom: '1px solid #f3f4f6'
-            }}>
-              <span style={{
-                fontSize: '14px',
-                fontWeight: '500',
-                color: '#374151'
-              }}>
-                Name
-              </span>
-              <span style={{
-                fontSize: '14px',
-                color: '#000000'
-              }}>
-                {user.displayName || 'Not provided'}
-              </span>
+          <div className="grid gap-4">
+            <div className="flex justify-between items-center py-3 border-b border-gray-100">
+              <span className="text-sm font-medium text-gray-700">Name</span>
+              <span className="text-sm text-black">{user.displayName || 'Not provided'}</span>
             </div>
             
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              padding: '12px 0',
-              borderBottom: '1px solid #f3f4f6'
-            }}>
-              <span style={{
-                fontSize: '14px',
-                fontWeight: '500',
-                color: '#374151'
-              }}>
-                Email
-              </span>
-              <span style={{
-                fontSize: '14px',
-                color: '#000000'
-              }}>
-                {user.email}
-              </span>
+            <div className="flex justify-between items-center py-3 border-b border-gray-100">
+              <span className="text-sm font-medium text-gray-700">Email</span>
+              <span className="text-sm text-black">{user.email}</span>
             </div>
             
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              padding: '12px 0',
-              borderBottom: '1px solid #f3f4f6'
-            }}>
-              <span style={{
-                fontSize: '14px',
-                fontWeight: '500',
-                color: '#374151'
-              }}>
-                Account Created
-              </span>
-              <span style={{
-                fontSize: '14px',
-                color: '#000000'
-              }}>
+            <div className="flex justify-between items-center py-3 border-b border-gray-100">
+              <span className="text-sm font-medium text-gray-700">Account Created</span>
+              <span className="text-sm text-black">
                 {user.metadata.creationTime ? new Date(user.metadata.creationTime).toLocaleDateString() : 'Unknown'}
               </span>
             </div>
             
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              padding: '12px 0'
-            }}>
-              <span style={{
-                fontSize: '14px',
-                fontWeight: '500',
-                color: '#374151'
-              }}>
-                Last Sign In
-              </span>
-              <span style={{
-                fontSize: '14px',
-                color: '#000000'
-              }}>
+            <div className="flex justify-between items-center py-3">
+              <span className="text-sm font-medium text-gray-700">Last Sign In</span>
+              <span className="text-sm text-black">
                 {user.metadata.lastSignInTime ? new Date(user.metadata.lastSignInTime).toLocaleDateString() : 'Unknown'}
               </span>
             </div>
@@ -286,94 +121,21 @@ export default function HomePage() {
         </div>
 
         {/* Quick Actions */}
-        <div style={{
-          backgroundColor: '#ffffff',
-          border: '1px solid #e5e5e5',
-          borderRadius: '12px',
-          padding: '32px'
-        }}>
-          <h3 style={{
-            fontSize: '20px',
-            fontWeight: '600',
-            color: '#000000',
-            margin: '0 0 24px 0'
-          }}>
+        <div className="bg-white border border-gray-300 rounded-xl p-8">
+          <h3 className="text-xl font-semibold text-black mb-6">
             Quick Actions
           </h3>
           
-          <div style={{
-            display: 'grid',
-            gap: '12px'
-          }}>
-            <button style={{
-              width: '100%',
-              padding: '16px 20px',
-              backgroundColor: '#ffffff',
-              color: '#000000',
-              border: '1px solid #e5e5e5',
-              borderRadius: '8px',
-              fontSize: '14px',
-              fontWeight: '500',
-              cursor: 'pointer',
-              transition: 'all 0.2s',
-              textAlign: 'left'
-            }}
-            onMouseEnter={(e) => {
-              (e.target as HTMLElement).style.backgroundColor = '#f9fafb';
-              (e.target as HTMLElement).style.borderColor = '#10b981';
-            }}
-            onMouseLeave={(e) => {
-              (e.target as HTMLElement).style.backgroundColor = '#ffffff';
-              (e.target as HTMLElement).style.borderColor = '#e5e5e5';
-            }}>
+          <div className="grid gap-3">
+            <button className="w-full py-4 px-5 bg-white text-black border border-gray-300 rounded-lg text-sm font-medium cursor-pointer transition-all text-left hover:bg-gray-50 hover:border-emerald-500">
               Update Profile
             </button>
             
-            <button style={{
-              width: '100%',
-              padding: '16px 20px',
-              backgroundColor: '#ffffff',
-              color: '#000000',
-              border: '1px solid #e5e5e5',
-              borderRadius: '8px',
-              fontSize: '14px',
-              fontWeight: '500',
-              cursor: 'pointer',
-              transition: 'all 0.2s',
-              textAlign: 'left'
-            }}
-            onMouseEnter={(e) => {
-              (e.target as HTMLElement).style.backgroundColor = '#f9fafb';
-              (e.target as HTMLElement).style.borderColor = '#10b981';
-            }}
-            onMouseLeave={(e) => {
-              (e.target as HTMLElement).style.backgroundColor = '#ffffff';
-              (e.target as HTMLElement).style.borderColor = '#e5e5e5';
-            }}>
+            <button className="w-full py-4 px-5 bg-white text-black border border-gray-300 rounded-lg text-sm font-medium cursor-pointer transition-all text-left hover:bg-gray-50 hover:border-emerald-500">
               Change Password
             </button>
             
-            <button style={{
-              width: '100%',
-              padding: '16px 20px',
-              backgroundColor: '#ffffff',
-              color: '#000000',
-              border: '1px solid #e5e5e5',
-              borderRadius: '8px',
-              fontSize: '14px',
-              fontWeight: '500',
-              cursor: 'pointer',
-              transition: 'all 0.2s',
-              textAlign: 'left'
-            }}
-            onMouseEnter={(e) => {
-              (e.target as HTMLElement).style.backgroundColor = '#f9fafb';
-              (e.target as HTMLElement).style.borderColor = '#10b981';
-            }}
-            onMouseLeave={(e) => {
-              (e.target as HTMLElement).style.backgroundColor = '#ffffff';
-              (e.target as HTMLElement).style.borderColor = '#e5e5e5';
-            }}>
+            <button className="w-full py-4 px-5 bg-white text-black border border-gray-300 rounded-lg text-sm font-medium cursor-pointer transition-all text-left hover:bg-gray-50 hover:border-emerald-500">
               Account Settings
             </button>
           </div>

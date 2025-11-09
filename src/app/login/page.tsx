@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { loginUser, validateEmail, validatePassword, onAuthStateChanged, getAuth } from '@/lib/firebase';
 
-// Prevent static generation - this page requires client-side Firebase
 export const dynamic = 'force-dynamic';
 
 export default function LoginPage() {
@@ -16,7 +15,6 @@ export default function LoginPage() {
   const router = useRouter();
 
   useEffect(() => {
-    // Only run on client side
     if (typeof window === "undefined") return;
     
     const unsubscribe = onAuthStateChanged(getAuth(), (user) => {
@@ -57,70 +55,27 @@ export default function LoginPage() {
   };
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      backgroundColor: '#ffffff',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '20px',
-      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
-    }}>
-      <div style={{
-        width: '100%',
-        maxWidth: '400px'
-      }}>
-        <div style={{
-          textAlign: 'center',
-          marginBottom: '40px'
-        }}>
-          <h1 style={{
-            fontSize: '32px',
-            fontWeight: '600',
-            color: '#000000',
-            margin: '0 0 8px 0'
-          }}>
+    <div className="min-h-screen bg-white flex items-center justify-center p-5 font-sans">
+      <div className="w-full max-w-sm">
+        <div className="text-center mb-10">
+          <h1 className="text-3xl font-semibold text-black mb-2">
             Welcome Back
           </h1>
-          <p style={{
-            fontSize: '16px',
-            color: '#666666',
-            margin: '0'
-          }}>
+          <p className="text-base text-gray-600">
             Sign in to your account
           </p>
         </div>
 
-        <div style={{
-          backgroundColor: '#ffffff',
-          border: '1px solid #e5e5e5',
-          borderRadius: '12px',
-          padding: '32px',
-          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
-        }}>
+        <div className="bg-white border border-gray-300 rounded-xl p-8 shadow-sm">
           <form onSubmit={handleSubmit}>
             {error && (
-              <div style={{
-                backgroundColor: '#fef2f2',
-                border: '1px solid #fecaca',
-                borderRadius: '8px',
-                padding: '12px 16px',
-                marginBottom: '24px',
-                color: '#dc2626',
-                fontSize: '14px'
-              }}>
+              <div className="bg-red-50 border border-red-300 rounded-lg p-3 mb-6 text-red-600 text-sm">
                 {error}
               </div>
             )}
 
-            <div style={{ marginBottom: '20px' }}>
-              <label style={{
-                display: 'block',
-                fontSize: '14px',
-                fontWeight: '500',
-                color: '#000000',
-                marginBottom: '6px'
-              }}>
+            <div className="mb-5">
+              <label className="block text-sm font-medium text-black mb-1.5">
                 Email Address
               </label>
               <input
@@ -130,31 +85,12 @@ export default function LoginPage() {
                 required
                 autoComplete="email"
                 placeholder="Enter your email"
-                style={{
-                  width: '100%',
-                  padding: '12px 16px',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '8px',
-                  fontSize: '16px',
-                  backgroundColor: '#ffffff',
-                  color: '#000000',
-                  outline: 'none',
-                  transition: 'border-color 0.2s',
-                  boxSizing: 'border-box'
-                }}
-                onFocus={(e) => (e.target as HTMLInputElement).style.borderColor = '#10b981'}
-                onBlur={(e) => (e.target as HTMLInputElement).style.borderColor = '#d1d5db'}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base bg-white text-black outline-none transition-colors focus:border-emerald-500"
               />
             </div>
 
-            <div style={{ marginBottom: '24px' }}>
-              <label style={{
-                display: 'block',
-                fontSize: '14px',
-                fontWeight: '500',
-                color: '#000000',
-                marginBottom: '6px'
-              }}>
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-black mb-1.5">
                 Password
               </label>
               <input
@@ -164,70 +100,29 @@ export default function LoginPage() {
                 required
                 autoComplete="current-password"
                 placeholder="Enter your password"
-                style={{
-                  width: '100%',
-                  padding: '12px 16px',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '8px',
-                  fontSize: '16px',
-                  backgroundColor: '#ffffff',
-                  color: '#000000',
-                  outline: 'none',
-                  transition: 'border-color 0.2s',
-                  boxSizing: 'border-box'
-                }}
-                onFocus={(e) => (e.target as HTMLInputElement).style.borderColor = '#10b981'}
-                onBlur={(e) => (e.target as HTMLInputElement).style.borderColor = '#d1d5db'}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base bg-white text-black outline-none transition-colors focus:border-emerald-500"
               />
             </div>
 
             <button
               type="submit"
               disabled={isLoading}
-              style={{
-                width: '100%',
-                padding: '14px 20px',
-                backgroundColor: isLoading ? '#9ca3af' : '#10b981',
-                color: '#ffffff',
-                border: 'none',
-                borderRadius: '8px',
-                fontSize: '16px',
-                fontWeight: '500',
-                cursor: isLoading ? 'not-allowed' : 'pointer',
-                transition: 'background-color 0.2s',
-                marginBottom: '24px'
-              }}
-              onMouseEnter={(e) => {
-                if (!isLoading) (e.target as HTMLElement).style.backgroundColor = '#059669';
-              }}
-              onMouseLeave={(e) => {
-                if (!isLoading) (e.target as HTMLElement).style.backgroundColor = '#10b981';
-              }}
+              className={`w-full py-3.5 px-5 text-white border-none rounded-lg text-base font-medium transition-colors mb-6 ${
+                isLoading 
+                  ? 'bg-gray-400 cursor-not-allowed' 
+                  : 'bg-emerald-500 hover:bg-emerald-600 cursor-pointer'
+              }`}
             >
               {isLoading ? 'Signing in...' : 'Sign In'}
             </button>
           </form>
 
-          <div style={{
-            textAlign: 'center',
-            paddingTop: '16px',
-            borderTop: '1px solid #f3f4f6'
-          }}>
-            <p style={{
-              fontSize: '14px',
-              color: '#666666',
-              margin: '0'
-            }}>
+          <div className="text-center pt-4 border-t border-gray-100">
+            <p className="text-sm text-gray-600 m-0">
               Don&apos;t have an account?{' '}
               <Link
                 href="/register"
-                style={{
-                  color: '#10b981',
-                  textDecoration: 'none',
-                  fontWeight: '500'
-                }}
-                onMouseEnter={(e) => (e.target as HTMLElement).style.textDecoration = 'underline'}
-                onMouseLeave={(e) => (e.target as HTMLElement).style.textDecoration = 'none'}
+                className="text-emerald-500 no-underline font-medium hover:underline"
               >
                 Create Account
               </Link>

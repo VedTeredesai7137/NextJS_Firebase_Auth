@@ -27,7 +27,7 @@ export default function LoginPage() {
 
     const emailError = validateEmail(email);
     const passwordError = validatePassword(password);
-    
+
     if (emailError) {
       setError(emailError);
       return;
@@ -42,8 +42,9 @@ export default function LoginPage() {
     try {
       await loginUser(email, password);
       router.push('/home');
-    } catch (error: any) {
-      setError(error.userFriendlyMessage || 'Login failed. Please try again.');
+    } catch (error: unknown) {
+      const authError = error as { userFriendlyMessage?: string };
+      setError(authError.userFriendlyMessage || 'Login failed. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -105,7 +106,7 @@ export default function LoginPage() {
                 {error}
               </div>
             )}
-            
+
             <div style={{ marginBottom: '20px' }}>
               <label style={{
                 display: 'block',
@@ -139,7 +140,7 @@ export default function LoginPage() {
                 onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
               />
             </div>
-            
+
             <div style={{ marginBottom: '24px' }}>
               <label style={{
                 display: 'block',
@@ -200,7 +201,7 @@ export default function LoginPage() {
               {isLoading ? 'Signing in...' : 'Sign In'}
             </button>
           </form>
-          
+
           <div style={{
             textAlign: 'center',
             paddingTop: '16px',
@@ -211,9 +212,9 @@ export default function LoginPage() {
               color: '#666666',
               margin: '0'
             }}>
-              Don't have an account?{' '}
-              <Link 
-                href="/register" 
+              Don&apos;t have an account?{' '}
+              <Link
+                href="/register"
                 style={{
                   color: '#10b981',
                   textDecoration: 'none',

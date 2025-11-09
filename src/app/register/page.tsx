@@ -48,8 +48,9 @@ export default function RegisterPage() {
     try {
       await registerUser(email, password, name);
       router.push('/home');
-    } catch (error: any) {
-      setError(error.userFriendlyMessage || 'Registration failed. Please try again.');
+    } catch (error: unknown) {
+      const authError = error as { userFriendlyMessage?: string };
+      setError(authError.userFriendlyMessage || 'Registration failed. Please try again.');
     } finally {
       setIsLoading(false);
     }

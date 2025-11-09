@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { onAuthStateChanged, auth } from '@/lib/firebase';
 
 export default function LandingPage() {
-  const [user, setUser] = useState<any>(null);
+  const [, setUser] = useState<null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 

@@ -235,7 +235,7 @@ export const auth = new Proxy({} as Auth, {
       const value = authInstance[prop as keyof Auth];
       // If it's a function, bind it to the auth instance
       if (typeof value === "function") {
-        return (value as Function).bind(authInstance);
+        return (value as (...args: any[]) => any).bind(authInstance);
       }
       return value;
     } catch (error) {
@@ -260,7 +260,7 @@ export const app = new Proxy({} as FirebaseApp, {
       const appInstance = getAppInstance();
       const value = appInstance[prop as keyof FirebaseApp];
       if (typeof value === "function") {
-        return (value as Function).bind(appInstance);
+        return (value as (...args: any[]) => any).bind(appInstance);
       }
       return value;
     } catch (error) {

@@ -13,9 +13,9 @@ import { getAnalytics as getFirebaseAnalytics, Analytics } from "firebase/analyt
 import { FirebaseApp } from "firebase/app";
 
 // Lazy initialization variables
-let app: FirebaseApp | null = null;
-let auth: Auth | null = null;
-let analytics: Analytics | null = null;
+let _appInstance: FirebaseApp | null = null;
+let _authInstance: Auth | null = null;
+let _analyticsInstance: Analytics | null = null;
 
 // Get Firebase config - only use in browser
 const getFirebaseConfig = () => {
@@ -63,8 +63,8 @@ const initializeFirebase = (): { app: FirebaseApp; auth: Auth; analytics: Analyt
   }
 
   // Return existing instances if already initialized
-  if (app && auth) {
-    return { app, auth, analytics };
+  if (_appInstance && _authInstance) {
+    return { app: _appInstance, auth: _authInstance, analytics: _analyticsInstance };
   }
 
   const firebaseConfig = getFirebaseConfig();
@@ -75,29 +75,29 @@ const initializeFirebase = (): { app: FirebaseApp; auth: Auth; analytics: Analyt
   }
 
   // Initialize Firebase only once
-  app = !getApps().length ? initializeApp(firebaseConfig) : getFirebaseApp();
-  auth = getFirebaseAuth(app);
-  analytics = typeof window !== "undefined" ? getFirebaseAnalytics(app) : null;
+  _appInstance = !getApps().length ? initializeApp(firebaseConfig) : getFirebaseApp();
+  _authInstance = getFirebaseAuth(_appInstance);
+  _analyticsInstance = typeof window !== "undefined" ? getFirebaseAnalytics(_appInstance) : null;
 
-  return { app, auth, analytics };
+  return { app: _appInstance, auth: _authInstance, analytics: _analyticsInstance };
 };
 
 // Get app instance (lazy initialization)
 const getAppInstance = (): FirebaseApp => {
-  if (!app) {
+  if (!_appInstance) {
     const instance = initializeFirebase();
-    app = instance.app;
+    _appInstance = instance.app;
   }
-  return app;
+  return _appInstance;
 };
 
 // Get auth instance (lazy initialization)
 const getAuthInstance = (): Auth => {
-  if (!auth) {
+  if (!_authInstance) {
     const instance = initializeFirebase();
-    auth = instance.auth;
+    _authInstance = instance.auth;
   }
-  return auth;
+  return _authInstance;
 };
 
 // Get analytics instance (lazy initialization)
@@ -105,11 +105,11 @@ const getAnalyticsInstance = (): Analytics | null => {
   if (typeof window === "undefined") {
     return null;
   }
-  if (!analytics) {
+  if (!_analyticsInstance) {
     const instance = initializeFirebase();
-    analytics = instance.analytics;
+    _analyticsInstance = instance.analytics;
   }
-  return analytics;
+  return _analyticsInstance;
 };
 
 // Error handling
